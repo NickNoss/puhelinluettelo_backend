@@ -8,6 +8,7 @@ morgan.token('req-body', (req) => JSON.stringify(req.body))
 app.use(express.json())
 app.use(morgan(':method :url :status :response-time ms - :req-body'))
 app.use(cors())
+app.use(express.static('build'))
 
 let persons = [
     {
@@ -54,7 +55,7 @@ let persons = [
     response.send(`Phonebook has info for ${count} people<br><br>${date}`)
   })
 
-  app.delete('/api/notes/:id', (request, response) => {
+  app.delete('/api/persons/:id', (request, response) => {
     const id = Number(request.params.id)
     persons = persons.filter(person => person.id !== id)
 
