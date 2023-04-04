@@ -5,6 +5,7 @@ const cors = require('cors')
 const app = express()
 const Person = require('./models/person')
 
+
 morgan.token('req-body', (req) => JSON.stringify(req.body))
 
 app.use(express.json())
@@ -63,21 +64,26 @@ app.use(express.static('build'))
       })
     }
   
-    const existingPerson = persons.find(p => p.name === body.name)
-    if (existingPerson) {
-      return response.status(400).json({ 
-        error: 'name must be unique' 
-      })
-    }
+    Person.findOne({ name: body.name })
+      .then(existingPerson => {
+        if (existingPerson) {
+          return response.status(400).json({ 
+            error: 'name must be unique' 
+          })
+        } else {
+          const person = new Person({
+            name: body.name,
+            number: body.number,
+          })
   
-    const person = new Person({
-      name: body.name,
-      number: body.number,
-    })
-  
-    person.save()
-      .then(savedPerson => {
-        response.json(savedPerson.toJSON())
+          person.save()
+            .then(savedPerson => {
+              response.json(savedPerson.toJSON())
+            })
+            .catch(error => {
+              console.log(error)
+            })
+        }
       })
       .catch(error => {
         console.log(error)
