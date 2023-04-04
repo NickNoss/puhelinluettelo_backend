@@ -16,6 +16,8 @@ app.use(express.static('build'))
   app.get('/api/persons', (request, response) => {
     Person.find({}).then(persons => {
       response.json(persons)
+    }).catch(error => {
+      console.log(error)
     })
   })
 
@@ -37,6 +39,8 @@ app.use(express.static('build'))
     .then(count => {
       const date = new Date()
       response.send(`Phonebook has info for ${count} people<br><br>${date}`)
+  }).catch(error => {
+    console.log(error)
   })
 })
 
@@ -49,13 +53,6 @@ app.use(express.static('build'))
       console.log(error)
     })
   })
-
-  const generateId = () => {
-    const maxId = persons.length > 0
-      ? Math.max(...persons.map(p => p.id))
-      : 0
-    return Math.floor(Math.random() * 10000) + maxId + 1
-  }
   
   app.post('/api/persons', (request, response) => {
     const body = request.body
