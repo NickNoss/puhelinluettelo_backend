@@ -1,7 +1,9 @@
+require('dotenv').config()
 const express = require('express')
 const morgan = require('morgan')
 const cors = require('cors')
 const app = express()
+const Person = require('./models/person')
 
 morgan.token('req-body', (req) => JSON.stringify(req.body))
 
@@ -10,56 +12,42 @@ app.use(morgan(':method :url :status :response-time ms - :req-body'))
 app.use(cors())
 app.use(express.static('build'))
 
-let persons = [
-    {
-      id: 1,
-      name: "Arto Hellas",
-      number: "040-123456"
-    },
-    {
-      id: 2,
-      name: "Ada Lovelace",
-      number: "39-44-5323523"
-    },
-    {
-      id: 3,
-      name: "Dan Abramov",
-      number: "12-43-234345"
-    },
-    {
-      id: 4,
-      name: "Mary Poppendick",
-      number: "39-23-6423122"
-    }
-  ]
-
 
   app.get('/api/persons', (request, response) => {
-    response.json(persons)
+    Person.find({}).then(persons => {
+      response.json(persons)
+    })
   })
 
   app.get('/api/persons/:id', (request, response) => {
-  const id = Number(request.params.id)
-  const person = persons.find(person => person.id === id)
-  
-  if (person) {
-    response.json(person)
-  } else  {
-    response.status(404).end()
-  }
-})
-
-  app.get('/info', (request, response) => {
-    const count = persons.length
-    const date = new Date()
-    response.send(`Phonebook has info for ${count} people<br><br>${date}`)
+    const id = request.params.id
+    Person.findById(id).then(person => {
+      if (person) {
+        response.json(person)
+      } else {
+        response.status(404).end()
+      }
+    }).catch(error => {
+      console.log(error)
+    })
   })
 
-  app.delete('/api/persons/:id', (request, response) => {
-    const id = Number(request.params.id)
-    persons = persons.filter(person => person.id !== id)
+  app.get('/info', (request, response) => {
+    Person.countDocuments({})
+    .then(count => {
+      const date = new Date()
+      response.send(`Phonebook has info for ${count} people<br><br>${date}`)
+  })
+})
 
-    response.status(204).end()
+  app.delete('/api/persons/:id', (request, response) => {
+    Person.findByIdAndRemove(request.params.id)
+    .then(() => {
+      response.status(204).end()
+    })
+    .catch(error => {
+      console.log(error)
+    })
   })
 
   const generateId = () => {
@@ -85,19 +73,22 @@ let persons = [
       })
     }
   
-    const person = {
+    const person = new Person({
       name: body.name,
       number: body.number,
-      id: generateId(),
-    }
+    })
   
-    persons = persons.concat(person)
-  
-    response.json(person)
+    person.save()
+      .then(savedPerson => {
+        response.json(savedPerson.toJSON())
+      })
+      .catch(error => {
+        console.log(error)
+      })
   })
 
 
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
