@@ -53,9 +53,4 @@ const deletePerson = (id) => {
   })
 }
 
-module.exports = {
-  getAllPersons,
-  addPerson,
-  updatePerson,
-  deletePerson
-}
+module.exports = Person

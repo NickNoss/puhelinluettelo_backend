@@ -64,31 +64,21 @@ app.use(express.static('build'))
       })
     }
   
-    Person.findOne({ name: body.name })
-      .then(existingPerson => {
-        if (existingPerson) {
-          return response.status(400).json({ 
-            error: 'name must be unique' 
-          })
-        } else {
-          const person = new Person({
-            name: body.name,
-            number: body.number,
-          })
+    const person = new Person({
+      name: body.name,
+      number: body.number,
+    })
   
-          person.save()
-            .then(savedPerson => {
-              response.json(savedPerson.toJSON())
-            })
-            .catch(error => {
-              console.log(error)
-            })
-        }
+    person.save()
+      .then(savedPerson => {
+        response.json(savedPerson.toJSON())
       })
       .catch(error => {
         console.log(error)
+        response.status(500).end()
       })
   })
+  
 
 
 const PORT = process.env.PORT
