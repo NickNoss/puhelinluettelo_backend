@@ -11,7 +11,6 @@ app.use(express.json())
 app.use(morgan(':method :url :status :response-time ms - :req-body'))
 app.use(cors())
 app.use(express.static('build'))
-app.use(requestLogger)
 
 app.get('/api/persons', (request, response, next) => {
   Person.find({})
