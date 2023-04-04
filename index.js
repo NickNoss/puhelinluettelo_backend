@@ -15,7 +15,7 @@ app.use(express.static('build'))
 
 
   app.get('/api/persons', (request, response) => {
-    Person.find({}).then(persons => {
+    Person.getAllPersons({}).then(persons => {
       response.json(persons)
     }).catch(error => {
       console.log(error)
