@@ -28,34 +28,4 @@ personSchema.set('toJSON', {
 
 const Person = mongoose.model('Person', personSchema)
 
-const getAllPersons = () => {
-  return Person.find({}).then(result => {
-    return result
-  })
-}
-
-const addPerson = (person) => {
-  const newPerson = new Person(person)
-  return newPerson.save().then(result => {
-    return result
-  })
-}
-
-const updatePerson = (id, person) => {
-  return Person.findByIdAndUpdate(id, person, { new: true }).then(result => {
-    return result
-  })
-}
-
-const deletePerson = (id) => {
-  return Person.findByIdAndRemove(id).then(result => {
-    return result
-  })
-}
-
-module.exports = {
-  getAllPersons,
-  addPerson,
-  updatePerson,
-  deletePerson
-}
+module.exports = Person
