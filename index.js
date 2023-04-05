@@ -46,32 +46,26 @@ app.delete('/api/persons/:id', (request, response, next) => {
   const id = request.params.id
 
   Person.findByIdAndRemove(id)
-    .then(deletedPerson => {
+    .then(() => {
       response.status(204).end()
     })
     .catch(error => next(error))
 })
 
 app.post('/api/persons', (request, response, next) => {
-  const body = request.body
-
-  if (!body.name || !body.number) {
-    return response.status(400).json({
-      error: 'name or number missing'
-    })
-  }
-
-  const person = new Person({
-    name: body.name,
-    number: body.number,
+  const newPerson = new Person({
+    name: request.body.name,
+    number: request.body.number,
   })
 
-  person.save()
-    .then(savedPerson => {
-      response.json(savedPerson.toJSON())
+  newPerson
+    .save()
+    .then((savedPerson) => {
+      response.json(savedPerson)
     })
-    .catch(error => next(error))
+    .catch((err) => next(err))
 })
+
 
 app.put('/api/persons/:id', (request, response, next) => {
   const body = request.body
@@ -81,8 +75,9 @@ app.put('/api/persons/:id', (request, response, next) => {
     number: body.number,
   }
 
-  Person.findByIdAndUpdate(request.params.id, person, { new: true })
+  Person.findByIdAndUpdate(request.params.id, person, { new: true, runValidators: true, context: 'query' })
     .then(updatedPerson => {
+      console.log(updatedPerson.toJSON)
       response.json(updatedPerson.toJSON())
     })
     .catch(error => next(error))
@@ -91,16 +86,17 @@ app.put('/api/persons/:id', (request, response, next) => {
 const errorHandler = (error, request, response, next) => {
   console.error(error.message)
 
-  if (error.name === 'CastError' && error.kind === 'ObjectId') {
+  if (error.name === 'CastError') {
     return response.status(400).send({ error: 'malformatted id' })
-  } else if (error.name === 'ValidationError' || error.name === 'ValidatorError') {
+  } else if (error.name === 'ValidationError') {
+    return response.status(400).json({ error: error.message })
+  } else {
     return response.status(400).json({ error: error.message })
   }
-
-  next(error)
 }
 
 app.use(errorHandler)
+
 
 const PORT = process.env.PORT
 app.listen(PORT, () => {
